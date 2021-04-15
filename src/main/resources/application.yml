@@ -1,0 +1,40 @@
+server:
+  port: 8080
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+  datasource:
+    druid:
+      db-type: mysql
+      username: root
+      password: 123456
+      url: jdbc:mysql://192.168.100.100:3306/miaosha?useUnicode=true&characterEncoding=utf8
+      test-while-idle: true
+      filters: stat
+      max-active: 2
+      initial-size: 1
+      max-wait: 60000
+      min-idle: 1
+      validation-query: select 'x'
+      pool-prepared-statements: true
+      max-open-prepared-statements: 20
+      driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:/mappers/*.xml
+  type-aliases-package: top.slomo.miaosha.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+redis:
+  host: 192.168.100.100
+  port: 6379
+  timeout: 3
+  poolMaxTotal: 10
+  poolMaxIdle: 10
+  poolMaxWait: 3
+logging:
+  level:
+    top.slomo.miaosha: debug
