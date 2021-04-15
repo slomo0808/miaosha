@@ -21,6 +21,36 @@ spring:
       pool-prepared-statements: true
       max-open-prepared-statements: 20
       driver-class-name: com.mysql.cj.jdbc.Driver
+  rabbitmq:
+    host: 192.168.100.100
+    port: 5672
+    username: admin
+    password: admin
+    virtual-host: /
+    listener:
+      simple:
+        # 消息接受者数量
+        concurrency: 10
+        max-concurrency: 10
+        # 每次从队列中取1个
+        prefetch: 1
+        # 容器启动时，消费者也启动
+        auto-startup: true
+        # 消费失败，自动重新入队
+        default-requeue-rejected: true
+    # 启用发送重试
+    template:
+      retry:
+        enabled: true
+        # 第一次发送和第二次发送之间的时间间隔 1000ms
+        initial-interval: 1000
+        # 最多重试三次
+        max-attempts: 3
+        # 后一次重试时间 = 前一次重试时间 * multiplier
+        multiplier: 1.0
+
+
+
 mybatis:
   mapper-locations: classpath:/mappers/*.xml
   type-aliases-package: top.slomo.miaosha.entity

@@ -39,7 +39,7 @@ public class MiaoshaController {
     MiaoshaService miaoshaService;
 
     /**
-     * QPS 1,435.379  5000*10  ERR 6.18%
+     * 837 QPS, 5000 threads, 10 loop, ERR 0%
      *
      */
     @PostMapping("do_miaosha")
