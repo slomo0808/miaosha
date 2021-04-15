@@ -24,4 +24,12 @@ public class MqSender {
         log.info("send message: " + message);
         amqpTemplate.convertAndSend(MqConfig.QUEUE ,message);
     }
+
+    public void sendTopic(String routingKey, Object msg) {
+        String message = msg instanceof String ? (String) msg : JSON.toJSONString(msg);
+        log.info("sendTopic, msg: {}", message);
+        amqpTemplate.convertAndSend(MqConfig.TOPIC_EXCHANGE, "topic.key1", message);
+        amqpTemplate.convertAndSend(MqConfig.TOPIC_EXCHANGE, "topic.key2", message);
+    }
+
 }

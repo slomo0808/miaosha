@@ -1,6 +1,5 @@
 package top.slomo.miaosha.util;
 
-import ch.qos.logback.core.db.dialect.DBUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import top.slomo.miaosha.entity.MiaoshaUser;

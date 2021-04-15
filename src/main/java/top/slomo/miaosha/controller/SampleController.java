@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import top.slomo.miaosha.entity.User;
+import top.slomo.miaosha.rabbitmq.MqSender;
 import top.slomo.miaosha.redis.RedisService;
 import top.slomo.miaosha.redis.UserKeyPrefix;
 import top.slomo.miaosha.service.UserService;
@@ -23,6 +24,23 @@ public class SampleController {
 
     @Autowired
     RedisService redisService;
+
+    @Autowired
+    MqSender mqSender;
+
+    @GetMapping("/sendDirect")
+    @ResponseBody
+    public String sendMsg(@RequestParam String msg) {
+        mqSender.send(msg);
+        return msg;
+    }
+
+    @GetMapping("/sendTopic")
+    @ResponseBody
+    public String sendTopicMessage(@RequestParam String msg) {
+        mqSender.sendTopic(null, msg);
+        return msg;
+    }
 
     @GetMapping("/demo")
     public String thymeleaf(Model model) {
