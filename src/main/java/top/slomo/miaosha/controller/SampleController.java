@@ -28,19 +28,19 @@ public class SampleController {
     @Autowired
     MqSender mqSender;
 
-    @GetMapping("/sendDirect")
-    @ResponseBody
-    public String sendMsg(@RequestParam String msg) {
-        mqSender.send(msg);
-        return msg;
-    }
-
-    @GetMapping("/sendTopic")
-    @ResponseBody
-    public String sendTopicMessage(@RequestParam String msg) {
-        mqSender.sendTopic(null, msg);
-        return msg;
-    }
+//    @GetMapping("/sendDirect")
+//    @ResponseBody
+//    public String sendMsg(@RequestParam String msg) {
+//        mqSender.send(msg);
+//        return msg;
+//    }
+//
+//    @GetMapping("/sendTopic")
+//    @ResponseBody
+//    public String sendTopicMessage(@RequestParam String msg) {
+//        mqSender.sendTopic(null, msg);
+//        return msg;
+//    }
 
     @GetMapping("/demo")
     public String thymeleaf(Model model) {

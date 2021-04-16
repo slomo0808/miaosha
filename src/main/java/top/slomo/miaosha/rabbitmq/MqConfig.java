@@ -13,11 +13,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MqConfig {
 
+    static final String MIAOSHA_QUEUE = "miaosha.queue";
     static final String QUEUE = "miaosha";
 
     static final String TOPIC_EXCHANGE = "topicExchange";
     static final String TOPIC_QUEUE1 = "topic.queue1";
     static final String TOPIC_QUEUE2 = "topic.queue2";
+
+    /**
+     * 秒杀消息队列
+     */
+    @Bean
+    Queue miaoshaQueue() {
+        return new Queue(MIAOSHA_QUEUE);
+    }
 
     /**
      * 默认点对点 Direct模式

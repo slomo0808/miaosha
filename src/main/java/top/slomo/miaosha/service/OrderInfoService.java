@@ -48,6 +48,7 @@ public class OrderInfoService {
         miaoshaOrder.setUserId(user.getId());
         miaoshaOrder.setGoodsId(goods.getId());
         miaoshaOrder.setOrderId(order.getId());
+
         redisService.set(OrderKeyPrefix.GET_BY_UID_GID, "" + user.getId() + "-" + goods.getId(), miaoshaOrder);
 
         orderInfoDao.insertMiaoshaOrder(miaoshaOrder);

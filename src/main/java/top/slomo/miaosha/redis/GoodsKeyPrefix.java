@@ -16,4 +16,5 @@ public class GoodsKeyPrefix extends BasePrefix {
 
     public static GoodsKeyPrefix GET_GOODS_LIST = new GoodsKeyPrefix(60, "gl");
     public static GoodsKeyPrefix GET_GOODS_DETAIL = new GoodsKeyPrefix(60, "gd");
+    public static GoodsKeyPrefix GOODS_STOCK_COUNT = new GoodsKeyPrefix(60, "gsc");
 }

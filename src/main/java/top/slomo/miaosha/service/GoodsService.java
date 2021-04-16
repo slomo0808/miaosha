@@ -29,14 +29,12 @@ public class GoodsService {
         return goodsDao.getGoodsVoById(id);
     }
 
-    public void reduceStock(GoodsVo goods) {
+    public boolean reduceStock(GoodsVo goods) {
         MiaoshaGoods g = new MiaoshaGoods();
         g.setId(goods.getMiaoshaGoodsId());
 
         int effectLine = goodsDao.reduceStock(g);
-        if (effectLine <= 0) {
-            throw new GlobalException(CodeMsg.MIAOSHA_FAILED);
-        }
+        return effectLine > 0;
     }
 
     public GoodsVo getGoodsVoByMiaoshaGoodsId(Long miaoshaGoodsId) {

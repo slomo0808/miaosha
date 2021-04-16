@@ -12,6 +12,13 @@ import redis.clients.jedis.JedisPoolConfig;
 import top.slomo.miaosha.entity.MiaoshaUser;
 import top.slomo.miaosha.exception.GlobalException;
 import top.slomo.miaosha.result.CodeMsg;
+import top.slomo.miaosha.service.GoodsService;
+import top.slomo.miaosha.vo.GoodsVo;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @description: .
@@ -26,7 +33,15 @@ public class RedisService {
     @Autowired
     JedisPool jedisPool;
 
+    @Autowired
+    GoodsService goodsService;
 
+    public long del(KeyPrefix prefix, String key) {
+        try(Jedis jedis = jedisPool.getResource()) {
+            key = prefix.prefix() + key;
+            return jedis.del(key);
+        }
+    }
 
     public <T> T get(KeyPrefix prefix, String key, Class<T> clazz) {
         try (Jedis jedis = jedisPool.getResource()) {
@@ -59,23 +74,57 @@ public class RedisService {
         }
     }
 
+    public String hmset(KeyPrefix prefix, String key, Map<String, String> hash) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            key = prefix.prefix() + key;
+            return jedis.hmset(key, hash);
+        }
+    }
 
-    public Long incr(KeyPrefix prefix, String key) {
+    public String hget(KeyPrefix prefix, String key, String field) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            key = prefix.prefix() + key;
+            return jedis.hget(key, field);
+        }
+    }
+
+
+    public long incr(KeyPrefix prefix, String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             key = prefix.prefix() + key;
             return jedis.incr(key);
         }
     }
 
-    public Long decr(KeyPrefix prefix, String key) {
+    public long decr(KeyPrefix prefix, String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             key = prefix.prefix() + key;
             return jedis.decr(key);
         }
     }
 
-    private <T> String beanToString(T value) {
+    public long hincrByOne(KeyPrefix prefix, String key, String field) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            key = prefix.prefix() + key;
+            return jedis.hincrBy(key, field, 1L);
+        }
+    }
 
+    public long hdecrByOne(KeyPrefix prefix, String key, String field) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            key = prefix.prefix() + key;
+            return jedis.hincrBy(key, field, -1L);
+        }
+    }
+
+    public long hincrBy(KeyPrefix prefix, String key, String field, long increment) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            key = prefix.prefix() + key;
+            return jedis.hincrBy(key, field, increment);
+        }
+    }
+
+    private <T> String beanToString(T value) {
         return JSON.toJSONString(value);
     }
 

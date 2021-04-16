@@ -46,6 +46,7 @@
                 <form id="miaoshaForm">
                     <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doMiaosha()">立即秒杀</button>
                     <input hidden name="miaoshaGoodsId" id="miaoshaGoodsId" />
+                    <input hidden name="goodsId" id="goodsId" />
                 </form>
             </td>
         </tr>
@@ -66,18 +67,59 @@
 </body>
 <script>
 
+    function getMiaoshaResult(goodsId, miaoshaGoodsId) {
+        g_showLoading();
+        $.ajax({
+            url: '/miaosha/result',
+            type: 'GET',
+            data: {
+                goodsId,
+                miaoshaGoodsId
+            },
+            success(data) {
+                if(data.code == 0) {
+                    const ret = data.data;
+                    if (ret > 0) {
+                        layer.confirm('恭喜你，秒杀成功！查看订单？', {btn:['确定', '取消']},
+                            () => {
+                                window.location.href = "/order_detail.htm?orderId=" + ret
+                            },
+                            () => {
+                                layer.closeAll();
+                            })
+                    } else if (ret < 0) {
+                        layer.msg("对不起,秒杀失败")
+                    }else {
+                        // 继续轮询
+                        setTimeout( function() {
+                            getMiaoshaResult(goodsId, miaoshaGoodsId)
+                        }, 1000)
+                    }
+                } else {
+                    layer.msg(data.msg);
+                }
+            },
+            error(data) {
+                layer.msg(data.msg);
+            }
+        })
+    }
+
     function doMiaosha() {
         const miaoshaGoodsId = $("#miaoshaGoodsId").val();
+        const goodsId = $("#goodsId").val();
 
         $.ajax({
             url:"/miaosha/do_miaosha",
             type: "POST",
             data: {
-                miaoshaGoodsId
+                miaoshaGoodsId,
+                goodsId
             },
             success: function (data) {
                 if(data.code == 0) {
-                    window.location.href = "/order_detail.htm?orderId=" + data.data.id
+                    // window.location.href = "/order_detail.htm?orderId=" + data.data.id
+                    getMiaoshaResult(goodsId, miaoshaGoodsId)
                 } else {
                     layer.msg(data.msg);
                 }
@@ -124,6 +166,7 @@
         $("#startTime").text(new Date(goods.startDate).format("yyyy-MM-dd hh:mm:ss"))
         $("#remainSeconds").val(remainSeconds);
         $("#miaoshaGoodsId").val(goods.miaoshaGoodsId);
+        $("#goodsId").val(goods.id);
         $("#goodsPrice").text(goods.goodsPrice);
         $("#miaoshaPrice").text(goods.miaoshaPrice);
         $("#stockCount").text(goods.stockCount);
