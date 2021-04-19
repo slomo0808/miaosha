@@ -28,6 +28,7 @@ public class CodeMsg {
 	public static CodeMsg ALREADY_MIAOSHA = new CodeMsg(500502, "秒杀已经成功，请勿重复秒杀");
 	public static CodeMsg MIAOSHA_FAILED = new CodeMsg(500502, "秒杀失败");
 	public static CodeMsg WRONG_CAPTCHA = new CodeMsg(500503, "验证码错误");
+	public static  CodeMsg RATE_LIMIT = new CodeMsg(500504, "请稍后再点击");
 
 
 	private CodeMsg( ) {

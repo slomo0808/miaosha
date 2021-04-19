@@ -165,9 +165,16 @@ public class MiaoshaService {
     }
 
     public boolean checkCaptcha(Long miaoshaGoodsId, Integer captchaCode, MiaoshaUser user) {
+        if (Objects.isNull(miaoshaGoodsId)) {
+            return false;
+        }
         final Integer localCode = redisService.get(MiaoshaKeyPrefix.CAPTCHA_CODE, user.getId() + "_" + miaoshaGoodsId, int.class);
-        redisService.del(MiaoshaKeyPrefix.CAPTCHA_CODE, user.getId() + "_" + miaoshaGoodsId);
+
         log.info("remoteCode: {}, localCode: {}", captchaCode, localCode);
-        return Objects.equals(localCode, captchaCode);
+        final boolean equals = Objects.isNull(captchaCode) || Objects.equals(localCode, captchaCode);
+        if (equals) {
+            redisService.del(MiaoshaKeyPrefix.CAPTCHA_CODE, user.getId() + "_" + miaoshaGoodsId);
+        }
+        return equals;
     }
 }

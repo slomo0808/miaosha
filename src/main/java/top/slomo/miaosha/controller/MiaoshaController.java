@@ -6,10 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import top.slomo.miaosha.access.AccessLimit;
 import top.slomo.miaosha.entity.MiaoshaOrder;
 import top.slomo.miaosha.entity.MiaoshaUser;
 import top.slomo.miaosha.rabbitmq.MiaoshaMessage;
 import top.slomo.miaosha.rabbitmq.MqSender;
+import top.slomo.miaosha.redis.AccessKeyPrefix;
 import top.slomo.miaosha.redis.GoodsKeyPrefix;
 import top.slomo.miaosha.redis.MiaoshaKeyPrefix;
 import top.slomo.miaosha.redis.RedisService;
@@ -21,9 +23,8 @@ import top.slomo.miaosha.util.UUIDUtil;
 import top.slomo.miaosha.vo.GoodsVo;
 
 import javax.imageio.ImageIO;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class MiaoshaController implements InitializingBean {
 
     // 内存标记判断
     private final ConcurrentHashMap<Long, Boolean> overMap = new ConcurrentHashMap<>();
+    private static final int RATE_LIMIT = 5;
 
     /**
      * 837 QPS, 5000 threads, 10 loop, ERR 0%
@@ -118,8 +120,10 @@ public class MiaoshaController implements InitializingBean {
         return Result.success(result);
     }
 
+    @AccessLimit(seconds = 5, maxCount = 5, requireLogin = true)
     @GetMapping("path")
-    public Result<String> getMiaoshaPath(@RequestParam Long miaoshaGoodsId, @RequestParam Integer captchaCode, MiaoshaUser user) {
+    public Result<String> getMiaoshaPath(@RequestParam Long miaoshaGoodsId, @RequestParam Integer captchaCode,
+                                         MiaoshaUser user) {
         if (Objects.isNull(user)) {
             return Result.error(CodeMsg.SESSION_ERROR);
         }
