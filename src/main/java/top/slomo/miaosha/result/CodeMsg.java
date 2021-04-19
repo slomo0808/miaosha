@@ -27,6 +27,8 @@ public class CodeMsg {
 	public static CodeMsg STOCK_NOT_ENOUGH = new CodeMsg(500501, "库存不足");
 	public static CodeMsg ALREADY_MIAOSHA = new CodeMsg(500502, "秒杀已经成功，请勿重复秒杀");
 	public static CodeMsg MIAOSHA_FAILED = new CodeMsg(500502, "秒杀失败");
+	public static CodeMsg WRONG_CAPTCHA = new CodeMsg(500503, "验证码错误");
+
 
 	private CodeMsg( ) {
 	}
