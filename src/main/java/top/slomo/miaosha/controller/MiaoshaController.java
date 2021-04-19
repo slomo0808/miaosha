@@ -1,5 +1,6 @@
 package top.slomo.miaosha.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -9,10 +10,13 @@ import top.slomo.miaosha.entity.MiaoshaUser;
 import top.slomo.miaosha.rabbitmq.MiaoshaMessage;
 import top.slomo.miaosha.rabbitmq.MqSender;
 import top.slomo.miaosha.redis.GoodsKeyPrefix;
+import top.slomo.miaosha.redis.MiaoshaKeyPrefix;
 import top.slomo.miaosha.redis.RedisService;
 import top.slomo.miaosha.result.CodeMsg;
 import top.slomo.miaosha.result.Result;
 import top.slomo.miaosha.service.*;
+import top.slomo.miaosha.util.MD5Util;
+import top.slomo.miaosha.util.UUIDUtil;
 import top.slomo.miaosha.vo.GoodsVo;
 
 import java.util.HashMap;
@@ -55,11 +59,20 @@ public class MiaoshaController implements InitializingBean {
      * 1500 QPS
      *
      */
-    @PostMapping("do_miaosha")
-    public Result<Integer> doMiaosha(@RequestParam Long goodsId, @RequestParam Long miaoshaGoodsId, MiaoshaUser user) {
+    @PostMapping("{path}/do_miaosha")
+    public Result<Integer> doMiaosha(
+            @RequestParam Long goodsId, @RequestParam Long miaoshaGoodsId,
+            @PathVariable String path, MiaoshaUser user) {
         if (Objects.isNull(user)) {
             return Result.error(CodeMsg.SESSION_ERROR);
         }
+        // path验证
+        String localPath = redisService.get(MiaoshaKeyPrefix.MIAOSHA_PATH, user.getId() + "_" + miaoshaGoodsId, String.class);
+        logger.info("localPath: {} \n path: {}", localPath, path);
+        if (!StringUtils.equals(localPath, path)) {
+            return Result.error(CodeMsg.MIAOSHA_FAILED);
+        }
+
         // 内存标记判断
         if (overMap.get(miaoshaGoodsId)) {
             return Result.error(CodeMsg.MIAOSHA_FAILED);
@@ -104,6 +117,16 @@ public class MiaoshaController implements InitializingBean {
         }
         Long result = miaoshaService.getMiaoshaResult(user.getId(), miaoshaGoodsId, goodsId);
         return Result.success(result);
+    }
+
+    @GetMapping("path")
+    public Result<String> getMiaoshaPath(@RequestParam Long miaoshaGoodsId, MiaoshaUser user) {
+        if (Objects.isNull(user)) {
+            return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        String path = MD5Util.md5(UUIDUtil.uuid() + "slomo");
+        redisService.set(MiaoshaKeyPrefix.MIAOSHA_PATH, user.getId() + "_" + miaoshaGoodsId, path);
+        return Result.success(path);
     }
 
     @Override

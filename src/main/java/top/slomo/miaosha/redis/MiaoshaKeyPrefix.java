@@ -8,6 +8,7 @@ package top.slomo.miaosha.redis;
 public class MiaoshaKeyPrefix extends BasePrefix{
 
     public static final MiaoshaKeyPrefix IS_GOODS_OVER = new MiaoshaKeyPrefix("go");
+    public static final MiaoshaKeyPrefix MIAOSHA_PATH = new MiaoshaKeyPrefix(60, "mp");
 
     public MiaoshaKeyPrefix(String prefix) {
         super(prefix);
