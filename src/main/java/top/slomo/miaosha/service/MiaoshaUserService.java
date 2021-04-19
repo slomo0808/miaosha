@@ -36,11 +36,11 @@ public class MiaoshaUserService {
 
     public MiaoshaUser getById(Long id) {
         MiaoshaUser user = redisService.get(MiaoshaUserKeyPrefix.GET_BY_ID, String.valueOf(id), MiaoshaUser.class);
-        if (!Objects.isNull(user)) {
+        if (Objects.nonNull(user)) {
             return user;
         }
         user = miaoshaUserDao.getById(id);
-        if (!Objects.isNull(user)) {
+        if (Objects.nonNull(user)) {
             redisService.set(MiaoshaUserKeyPrefix.GET_BY_ID, String.valueOf(id), user);
         }
         return user;
@@ -88,7 +88,7 @@ public class MiaoshaUserService {
             throw new GlobalException(CodeMsg.TOKEN_EMPTY);
         }
         MiaoshaUser user = redisService.get(MiaoshaUserKeyPrefix.TOKEN, token, MiaoshaUser.class);
-        if (!Objects.isNull(user)) {
+        if (Objects.nonNull(user)) {
             // 延长有效期
             addCookie(response, token, user);
         }

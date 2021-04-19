@@ -52,8 +52,8 @@ public class MiaoshaController implements InitializingBean {
     /**
      * 837 QPS, 5000 threads, 10 loop, ERR 0%
      *
-     * 热身前 1257 QPS
-     * 热身后 1568 QPS
+     * 1500 QPS
+     *
      */
     @PostMapping("do_miaosha")
     public Result<Integer> doMiaosha(@RequestParam Long goodsId, @RequestParam Long miaoshaGoodsId, MiaoshaUser user) {
@@ -88,7 +88,7 @@ public class MiaoshaController implements InitializingBean {
         }
         // 有库存，判断是否已经秒杀到了
         MiaoshaOrder miaoshaOrder = orderInfoService.getMiaoshaOrderByUserIdAndGoodsId(user.getId(), goodsId);
-        if (!Objects.isNull(miaoshaOrder)) {
+        if (Objects.nonNull(miaoshaOrder)) {
             return Result.error(CodeMsg.ALREADY_MIAOSHA);
         }
         // 减库存 下订单 写入秒杀订单

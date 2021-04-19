@@ -34,7 +34,7 @@ public class UserUtil {
             user.setPassword(MD5Util.inputPassToDBPass("123456", user.getSalt()));
             users.add(user);
         }
-
+        /*
         System.out.println("create users");
         // 插入数据库
         Class.forName("com.mysql.cj.jdbc.Driver");
@@ -56,7 +56,7 @@ public class UserUtil {
 		pstmt.executeBatch();
 		pstmt.close();
         conn.close();
-
+        */
         String urlStr = "http://localhost:8080/login/do_login";
         File file = new File("D:/tokens.txt");
         if(file.exists()) {
