@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import top.slomo.miaosha.entity.MiaoshaOrder;
 import top.slomo.miaosha.entity.MiaoshaUser;
 import top.slomo.miaosha.rabbitmq.MiaoshaMessage;
 import top.slomo.miaosha.rabbitmq.MqSender;
@@ -19,6 +20,13 @@ import top.slomo.miaosha.util.MD5Util;
 import top.slomo.miaosha.util.UUIDUtil;
 import top.slomo.miaosha.vo.GoodsVo;
 
+import javax.imageio.ImageIO;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +93,12 @@ public class MiaoshaController implements InitializingBean {
             return Result.error(CodeMsg.MIAOSHA_FAILED);
         }
 
+        // 有库存，判断是否已经秒杀到了
+        MiaoshaOrder miaoshaOrder = orderInfoService.getMiaoshaOrderByUserIdAndGoodsId(user.getId(), goodsId);
+        if (Objects.nonNull(miaoshaOrder)) {
+            return Result.error(CodeMsg.ALREADY_MIAOSHA);
+        }
+
         // mq发送秒杀消息
         final MiaoshaMessage mm = new MiaoshaMessage();
         mm.setMiaoshaUser(user);
@@ -93,21 +107,6 @@ public class MiaoshaController implements InitializingBean {
         sender.sendMiaoshaMessage(mm);
 
         return Result.success(0);
-        /*
-        // 判断商品库存
-        GoodsVo goods = goodsService.getGoodsVoByMiaoshaGoodsId(miaoshaGoodsId);
-        if (goods.getStockCount() <= 0) {
-            return Result.error(CodeMsg.MIAOSHA_FAILED);
-        }
-        // 有库存，判断是否已经秒杀到了
-        MiaoshaOrder miaoshaOrder = orderInfoService.getMiaoshaOrderByUserIdAndGoodsId(user.getId(), goodsId);
-        if (Objects.nonNull(miaoshaOrder)) {
-            return Result.error(CodeMsg.ALREADY_MIAOSHA);
-        }
-        // 减库存 下订单 写入秒杀订单
-        OrderInfo orderInfo = miaoshaService.miaosha(user, goods);
-        return Result.success(orderInfo);
-        */
     }
 
     @GetMapping("result")
@@ -120,13 +119,30 @@ public class MiaoshaController implements InitializingBean {
     }
 
     @GetMapping("path")
-    public Result<String> getMiaoshaPath(@RequestParam Long miaoshaGoodsId, MiaoshaUser user) {
+    public Result<String> getMiaoshaPath(@RequestParam Long miaoshaGoodsId, @RequestParam Integer captchaCode, MiaoshaUser user) {
         if (Objects.isNull(user)) {
             return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        // 验证captcha
+        if (!miaoshaService.checkCaptcha(miaoshaGoodsId, captchaCode, user)) {
+            return Result.error(CodeMsg.WRONG_CAPTCHA);
         }
         String path = MD5Util.md5(UUIDUtil.uuid() + "slomo");
         redisService.set(MiaoshaKeyPrefix.MIAOSHA_PATH, user.getId() + "_" + miaoshaGoodsId, path);
         return Result.success(path);
+    }
+
+    @GetMapping("captcha")
+    public Object captcha(@RequestParam Long miaoshaGoodsId, MiaoshaUser user, HttpServletResponse response) throws IOException {
+        if (Objects.isNull(user)) {
+            return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        BufferedImage image = miaoshaService.createCaptcha(miaoshaGoodsId, user);
+        final ServletOutputStream out = response.getOutputStream();
+        ImageIO.write(image, "JPEG", out);
+        out.flush();
+        out.close();
+        return null;
     }
 
     @Override
